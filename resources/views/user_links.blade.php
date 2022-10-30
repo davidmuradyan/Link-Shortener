@@ -17,50 +17,36 @@
         <style>
             body {
                 font-family: 'Nunito', sans-serif;
-            }
-
-            .form-link-creation-input {
-                height: 50px;
-                margin-bottom: 0;
-                padding-top: 11px;
-                padding-bottom: 11px;
-                border: 1px solid rgba(175,185,197,.36);
-                border-radius: 4px;
-                background-color: #fff;
-                color: #161c34;
-                font-size: 20px;
-                line-height: 28px;
-            }
-
-            .btn-primary-3 {
-                padding: 11px 30px;
-                border-radius: 4px;
-                background-color: #228fc2;
-                color: #fff;
-                font-size: 20px;
-                line-height: 28px;
-                font-weight: 500;
+                color: #a0aec0;
             }
 
             .max-w-6xl {
-                min-width: 900px;
+                min-width: 88%;
             }
 
-            .form-link-creation-input {
-                min-width: 77%;
+            #user-links-table {
+                width:100%;
+                /*text-align: center*/
             }
 
-            .select {
-                width: 200px;
+            td, th {
+                border: 1px solid #a0aec0;
+                max-width: 5px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+
+            table {
+                border: 2px solid #a0aec0;
             }
         </style>
     </head>
     <body class="antialiased">
         <div class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center py-4 sm:pt-0">
                 <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
-                    <a href="{{ url('/my-links') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">My Links</a>
-                    <a href="{{ url('/login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">LogOut</a>
-
+                    <a href="{{ url('/all-links-csv') }}" class="btn btn-primary">Export as CSV</a>
+                        <a href="{{ url('/') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Back</a>
+                        <a href="{{ url('/login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">LogOut</a>
                 </div>
 
             <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
@@ -69,33 +55,36 @@
                     <div class="grid grid-cols-1 md:grid-cols-1">
                         <div class="p-6">
 
-                            <div>
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    {{ Form::open(['route' => ['shorten'],'method' => 'POST']) }}
-                                        {{ Form::text('website_url') }}
-                                        @if($errors->has('website_url'))
-                                            <div class="error">{{ $errors->first('website_url') }}</div>
-                                        @endif
-                                        <br>
-                                        {{ Form::select('domain', array_column($domains, 'name', 'id'), ['class'=>'Domain']) }}
-                                        @if($errors->has('domain'))
-                                            <div class="error">{{ $errors->first('domain') }}</div>
-                                        @endif
-                                        <br>
-                                        <br>
-                                        {{ Form::submit('Shorten URL', []) }}
-                                    {{ Form::close() }}
-                                </div>
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    @if(isset($shortLink))
-                                        <p>{{ $shortLink }}</p>
-                                    @endif
-                                    @if(isset($qrCode))
-                                        <p>{!! $qrCode !!}</p>
-                                    @endif
-                                </div>
-                            </div>
+                            <table id="user-links-table" class="table table-striped table-bordered nowrap">
+                                <thead>
+                                <tr>
+                                    <th>Website URL</th>
+                                    <th>Short URL</th>
+                                    <th>QR Code</th>
+                                    <th>Clicks</th>
+                                    <th>Creator name</th>
+                                    <th>Creator email</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($data as $record)
+                                        <tr>
+                                            <td>{{ $record->website_url }}</td>
+                                            <td>{{ $record->getUrl() }}</td>
+                                            <td>{!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(50)->generate($record->getUrl()) !!}</td>
+                                            <td>{{ $record->clicks }}</td>
+                                            <td>{{ $record->creator->full_name }}</td>
+                                            <td>{{ $record->creator->email }}</td>
+                                            <td>{{ $record->created_at }}</td>
+                                            <td>{{ $record->updated_at }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
+
                     </div>
                 </div>
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LinkController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,12 +15,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('dashboard');
-})->name('dashboard');
-
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
 Route::get('/register', [AuthController::class, 'registrationPage'])->name('registerPage');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
-Route::get('logout', [AuthController::class, 'logout']);
+
+Route::group(['middleware' => ['auth:sanctum']], function ($router) {
+    Route::get('logout', [AuthController::class, 'logout']);
+    Route::get('/', [LinkController::class, 'index'])->name('dashboard');
+    Route::post('/shorten', [LinkController::class, 'shorten'])->name('shorten');
+    Route::get('my-links', [LinkController::class, 'linksPage'])->name('my-links-page');
+    Route::get('link/{link:slug}', [LinkController::class, 'viewLink'])->name('view-link');
+    Route::get('/all-links-csv', [LinkController::class, 'allLinksCsv'])->name('all-links-csv');
+});
