@@ -27,4 +27,6 @@ Route::group(['middleware' => ['auth:sanctum']], function ($router) {
     Route::get('my-links', [LinkController::class, 'linksPage'])->name('my-links-page');
     Route::get('link/{link:slug}', [LinkController::class, 'viewLink'])->name('view-link');
     Route::get('/all-links-csv', [LinkController::class, 'allLinksCsv'])->name('all-links-csv');
+    Route::get('/upload-csv', [LinkController::class, 'uploadCSVPage'])->name('upload-csv-page');
+    Route::post('/upload-csv', [LinkController::class, 'uploadCSV'])->name('upload-csv');
 });

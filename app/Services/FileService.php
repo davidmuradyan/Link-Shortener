@@ -3,17 +3,25 @@
 namespace App\Services;
 
 use App\Models\Link;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 
 class FileService
 {
+    private LinkService $linkService;
+    public function __construct(LinkService $linkService) {
+        $this->linkService = $linkService;
+    }
+
     /**
      * @return BinaryFileResponse
      */
-    public function downloadCsv(): BinaryFileResponse
+    public static function downloadCsv(): BinaryFileResponse
     {
         $table = Link::with('creator')->where('creator_id', Auth::id())->get();
         $filename = "report.csv";
@@ -49,5 +57,36 @@ class FileService
         );
 
         return Response::download($filename, 'report.csv', $headers);
+    }
+
+    /**
+     * @param Request $request
+     * @throws FileNotFoundException
+     */
+    function uploadCSV(Request $request): void
+    {
+        $path = $this->putFileToLocal($request);
+        $path = storage_path($path);
+        $fp = fopen($path, 'r');
+        while ($line = fgetcsv($fp)) {
+            $websiteUrl = $line[0];
+            $this->linkService->shorten($request->domain, $websiteUrl);
+        }
+        fclose($fp);
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     * @throws FileNotFoundException
+     */
+    public function putFileToLocal(Request $request): string
+    {
+        $file = $request->file('upload-csv');
+        $content = $file->get();
+        $fileName = $file->getClientOriginalName();
+
+        Storage::put($fileName, $content);
+        return "app/$fileName";
     }
 }

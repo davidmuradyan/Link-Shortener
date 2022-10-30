@@ -19,19 +19,6 @@
                 font-family: 'Nunito', sans-serif;
             }
 
-            .form-link-creation-input {
-                height: 50px;
-                margin-bottom: 0;
-                padding-top: 11px;
-                padding-bottom: 11px;
-                border: 1px solid rgba(175,185,197,.36);
-                border-radius: 4px;
-                background-color: #fff;
-                color: #161c34;
-                font-size: 20px;
-                line-height: 28px;
-            }
-
             .btn-primary-3 {
                 padding: 11px 30px;
                 border-radius: 4px;
@@ -46,19 +33,15 @@
                 min-width: 900px;
             }
 
-            .form-link-creation-input {
-                min-width: 77%;
-            }
-
-            .select {
-                width: 200px;
+            .short-link {
+                color: #a0aec0;
             }
         </style>
     </head>
     <body class="antialiased">
         <div class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center py-4 sm:pt-0">
                 <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
-                    <a href="{{ url('/upload-csv') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Upload CSV</a>
+                    <a href="{{ url('/') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Back</a>
                     <a href="{{ url('/my-links') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">My Links</a>
                     <a href="{{ url('/login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">LogOut</a>
 
@@ -69,34 +52,24 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-1">
                         <div class="p-6">
-
-                            <div>
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    {{ Form::open(['route' => ['shorten'],'method' => 'POST']) }}
-                                        {{ Form::text('website_url') }}
-                                        @if($errors->has('website_url'))
-                                            <div class="error">{{ $errors->first('website_url') }}</div>
-                                        @endif
-                                        <br>
-                                        {{ Form::select('domain', array_column($domains, 'name', 'id'), ['class'=>'Domain']) }}
-                                        @if($errors->has('domain'))
-                                            <div class="error">{{ $errors->first('domain') }}</div>
-                                        @endif
-                                        <br>
-                                        <br>
-                                        {{ Form::submit('Shorten URL', []) }}
-                                    {{ Form::close() }}
-                                </div>
-                                <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                    @if(isset($shortLink))
-                                        <p>{{ $shortLink }}</p>
-                                    @endif
-                                    @if(isset($qrCode))
-                                        <p>{!! $qrCode !!}</p>
-                                    @endif
-                                </div>
-                            </div>
+                            {{ Form::open(['route' => ['upload-csv'],'method' => 'POST', 'files' => true]) }}
+                            {{ Form::file('upload-csv') }}
+                            @if($errors->has('upload-csv'))
+                                <div class="error">{{ $errors->first('upload-csv') }}</div>
+                            @endif
+                            <br>
+                            {{ Form::select('domain', array_column($domains, 'name', 'id'), ['class'=>'Domain']) }}
+                            @if($errors->has('domain'))
+                                <div class="error">{{ $errors->first('domain') }}</div>
+                            @endif
+                            <br>
+                            <br>
+                            {{ Form::submit('Submit File', []) }}
+                            {{ Form::close() }}
+{{--                            <p class="short-link">{!! $shortLink !!} </p>--}}
+{{--                            <p>{!! $qrCode !!}</p>--}}
                         </div>
+
                     </div>
                 </div>
 

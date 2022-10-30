@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Requests\LinkRequest;
-use App\Models\Domain;
 use App\Models\Link;
 use App\Models\LinkView;
 use Illuminate\Http\Request;
@@ -14,17 +12,17 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class LinkService
 {
     /**
-     * @param LinkRequest $request
+     * @param $domain
+     * @param $websiteUrl
      * @return array
      */
-    public function shorten(LinkRequest $request): array
+    public function shorten($domain, $websiteUrl): array
     {
-        $domain = Domain::find($request->domain);
         $slug = Str::random(10). time(); // ToDo: can be implemented more unique slug
 
         $data = [
-            'website_url' => $request->website_url,
-            'domain_id' => $domain->id,
+            'website_url' => $websiteUrl,
+            'domain_id' => $domain,
             'slug' => $slug,
             'tracking_data' => '',
             'clicks' => 0,
@@ -44,14 +42,17 @@ class LinkService
      */
     public function viewLink(Request $request, Link $link): string
     {
-        $link->clicks += 1;
-        $link->save();
+        try {
+            $link->clicks += 1;
+            $link->save();
 
-        LinkView::create([
-            'link_id' => $link->id,
-            'ip' => $request->ip(),
-        ]);
-
-        return $link->website_url;
+            LinkView::create([
+                'link_id' => $link->id,
+                'ip' => $request->ip(),
+            ]);
+            return $link->website_url;
+        } catch (\Exception $exception) {
+            return $exception->getMessage();
+        }
     }
 }
